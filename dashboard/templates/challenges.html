@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Challenges - ShadowNet CTF{% endblock %}
+
+{% block content %}
+<h2>Challenges</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+    {% for ch in challenges %}
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+        {% if ch.id in solved %}
+            <span style="position: absolute; top: 1rem; right: 1rem; color: var(--success-color); font-weight: bold;">✓ Solved</span>
+        {% endif %}
+        <div>
+            <h3 style="margin-top: 0; color: var(--accent-color);">{{ ch.name }}</h3>
+            <p style="font-size: 0.9rem; color: #8b949e;">
+                Domain: <strong>{{ ch.domain }}</strong> | Points: <strong>{{ ch.points }}</strong>
+            </p>
+            <p style="font-size: 0.9rem;">Difficulty: {{ ch.difficulty }}</p>
+            <p>{{ ch.description }}</p>
+        </div>
+        <div style="margin-top: 1rem;">
+            <a href="{{ url_for('challenge_detail', challenge_id=ch.id) }}" class="btn" style="width: 100%; text-align: center; box-sizing: border-box;">View Challenge</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

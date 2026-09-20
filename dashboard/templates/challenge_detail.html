@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}{{ challenge.name }} - ShadowNet CTF{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>{{ challenge.name }}</h2>
+        <span style="background-color: var(--accent-color); color: #000; padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: bold;">{{ challenge.domain }} - {{ challenge.points }} pts</span>
+    </div>
+    
+    <p><strong>Difficulty:</strong> {{ challenge.difficulty }} | <strong>Stage:</strong> {{ challenge.stage_number }}</p>
+    <hr style="border-color: var(--border-color);">
+    <p>{{ challenge.description }}</p>
+    
+    {% if challenge.delivery_method %}
+        <p><strong>Delivery Method:</strong> {{ challenge.delivery_method }}</p>
+    {% endif %}
+
+    <div style="margin-top: 2rem;">
+        {% if solved %}
+            <div class="alert alert-success">
+                ✓ You have already solved this challenge!
+            </div>
+        {% else %}
+            <div id="submit-result"></div>
+            <div style="margin-bottom: 1rem;">
+                <label for="flag-input"><strong>Submit Flag:</strong></label>
+                <input type="text" id="flag-input" placeholder="Enter flag here..." style="margin-bottom: 0.5rem;">
+                <button onclick="submitFlag('{{ challenge.id }}')" style="width: 100%;">Submit Flag</button>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if hints %}
+<div class="card">
+    <h3>Hints</h3>
+    <ul>
+        {% for hint in hints %}
+            <li><strong>Hint {{ hint.hint_level }}:</strong> {{ hint.hint_text }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<a href="{{ url_for('challenges') }}" class="btn" style="background-color: var(--border-color);">← Back to Challenges</a>
+
+<script>
+function submitFlag(challengeId) {
+    const flagInput = document.getElementById('flag-input');
+    const resultDiv = document.getElementById('submit-result');
+    if (!flagInput) return;
+    
+    const flag = flagInput.value.trim();
+    if (!flag) {
+        resultDiv.innerHTML = '<div class="alert alert-error">Please enter a flag.</div>';
+        return;
+    }
+
+    fetch('/api/submit_flag', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            challenge_id: parseInt(challengeId, 10),
+            flag: flag
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.correct) {
+            resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            resultDiv.innerHTML = `<div class="alert alert-error">${data.message || data.error}</div>`;
+        }
+    })
+    .catch(err => {
+        resultDiv.innerHTML = '<div class="alert alert-error">An error occurred while submitting the flag.</div>';
+    });
+}
+</script>
+{% endblock %}

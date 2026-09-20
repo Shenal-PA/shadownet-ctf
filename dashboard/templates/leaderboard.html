@@ -4,29 +4,26 @@
 
 {% block content %}
 <h2>Leaderboard</h2>
+
 <div class="card">
-    <table>
+    <table style="width: 100%; border-collapse: collapse;">
         <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Username</th>
-                <th>Team</th>
-                <th>Solved</th>
-                <th>Points</th>
+            <tr style="background: #667eea; color: white;">
+                <th style="padding: 12px; text-align: left;">Rank</th>
+                <th style="padding: 12px; text-align: left;">Team</th>
+                <th style="padding: 12px; text-align: right;">Points</th>
+                <th style="padding: 12px; text-align: right;">Challenges Solved</th>
+                <th style="padding: 12px; text-align: left;">Last Submission</th>
             </tr>
         </thead>
         <tbody>
-            {% for entry in leaderboard %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ entry['username'] if entry['username'] else entry[0] }}</td>
-                <td>{{ entry['team_name'] if entry['team_name'] else (entry[1] or '-') }}</td>
-                <td>{{ entry['challenges_solved'] if entry['challenges_solved'] is defined else entry[3] }}</td>
-                <td style="color: var(--accent-color); font-weight: bold;">{{ entry['total_points'] if entry['total_points'] is defined else entry[2] }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5" style="text-align: center; color: #8b949e;">No submissions recorded yet.</td>
+            {% for rank, (username, team_name, points, solved, timestamp) in enumerate(leaderboard, 1) %}
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px;">#{{ rank }}</td>
+                <td style="padding: 12px;">{{ team_name or username }}</td>
+                <td style="padding: 12px; text-align: right; font-weight: bold;">{{ points }}</td>
+                <td style="padding: 12px; text-align: right;">{{ solved }}/8</td>
+                <td style="padding: 12px;">{{ timestamp or 'N/A' }}</td>
             </tr>
             {% endfor %}
         </tbody>

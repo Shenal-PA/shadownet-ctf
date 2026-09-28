@@ -3,6 +3,8 @@
 Updated: 2026-09-28  
 Status: Planning and early challenge preparation; dashboard implementation pending.
 
+For the current project overview and contributor entry point, see [README.md](README.md). This document retains the detailed implementation plan and the dated repository inspection below. The README has since been refreshed to describe the eight-stage plan; application implementation and folder alignment remain pending.
+
 ## 1. Purpose and current status
 
 ShadowNet CTF is a browser-accessible CTF platform with eight challenges around the fictional company NexaCorp. Players progress through different security domains, submit flags, earn points, and view a leaderboard. The intended visual style is black, green, and red.
@@ -118,7 +120,7 @@ Use `stages/` consistently in build paths; the migration reference also contains
 ### Repository preparation
 
 - [ ] Coordinate and apply the folder alignment above.
-- [ ] Update README to eight stages and the actual implementation status.
+- [x] Update README to eight stages and the actual implementation status.
 - [ ] Update and verify the architecture diagram.
 - [ ] Define challenge IDs, flag format, points, hints and connection metadata.
 - [ ] Confirm ownership of the remaining stages.

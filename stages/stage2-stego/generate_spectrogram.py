@@ -7,9 +7,7 @@ import soundfile as sf
 import matplotlib.pyplot as plt
 from scipy import signal
 
-# ==============================================================================
 # CONFIGURATION
-# ==============================================================================
 STAGE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(STAGE_DIR, "assets")
 os.makedirs(ASSETS_DIR, exist_ok=True)
@@ -260,4 +258,4 @@ if __name__ == "__main__":
     step1_create_whistleblower_image_and_embed()
     step2_generate_audio_files()
     step3_generate_reference_spectrogram()
-    print("\n✅ All assets generated successfully in 'assets/' directory.")
+    print("\nAll assets generated successfully in 'assets/' directory.")

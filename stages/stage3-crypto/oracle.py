@@ -33,10 +33,14 @@ def handle_client(client_socket, address):
         client_socket.send(f"Send plaintext to encrypt (type 'quit' to exit):\n".encode())
 
         while True:
-            data = client_socket.recv(1024).decode().strip()
+            raw_data = client_socket.recv(1024)
+            if not raw_data:
+                break
 
-            if not data or data.lower() == 'quit':
-                print(f"[-] Connection from {address} closed.")
+            data = raw_data.decode(errors='ignore').strip()
+
+            if not data or data.lower() in ['quit', 'exit']:
+                client_socket.send(b"Goodbye!\n")
                 break
 
             if len(data) > 1000:
@@ -46,6 +50,12 @@ def handle_client(client_socket, address):
             #encrypt the input
             encrypted = vigenere_encrypt(data, KEY)
             client_socket.send(f"Encrypted: {encrypted}\n".encode())
+
+            target_clean = ENCRYPTED_FLAG.replace(" ", "")
+            if encrypted.replace(" ", "") == target_clean:
+                flag = os.getenv("FLAG", "SHADOWNET{7h_0f_7h3_3ncrypt10n_1s_4w3s0m3}")
+                client_socket.send(f"\n[+] Congratulations! Correct Decryption!\n[+] Flag: {flag}\n".encode())
+                break
 
             print(f"[*] Client {address}: encrypted '{data}' to '{encrypted}'")
 
@@ -66,10 +76,11 @@ def main():
     print(f"[+] Encrypted Flag: {ENCRYPTED_FLAG}")
 
     try:
-        client_socket, address = server_socket.accept()
-        client_thread = Thread(target=handle_client, args=(client_socket, address))
-        client_thread.daemon = True
-        client_thread.start()
+        while True:
+            client_socket, address = server_socket.accept()
+            client_thread = Thread(target=handle_client, args=(client_socket, address))
+            client_thread.daemon = True
+            client_thread.start()
     except KeyboardInterrupt:
         print("\n[*] Shutting down...")
     finally:

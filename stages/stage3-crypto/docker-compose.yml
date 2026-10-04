@@ -1,0 +1,20 @@
+services:
+  stage3-crypto:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stage3-crypto
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./oracle.py:/app/oracle.py
+    networks:
+      - stage3-net
+    restart: unless-stopped
+    environment:
+      - KEY=SECRET
+      - FLAG=SHADOWNET{7h_0f_7h3_3ncrypt10n_1s_4w3s0m3}
+
+networks:
+  stage3-net:
+    driver: bridge

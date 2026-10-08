@@ -4,61 +4,6 @@ An eight-stage Capture The Flag project for **IE3132 — Penetration Testing, SL
 
 **Status: early implementation.** Stage 1 is a complete standalone static OSINT challenge with a company website, twelve staff profiles, and a metadata puzzle. Stage 4 is implemented and tested locally. Stage 2 assets and a Stage 3 oracle are present; the dashboard is partial and the full platform is not yet runnable or deployed.
 
-## Set up Stages 1 and 4 after cloning
-
-All code and answer-free assets are included in Git. No private bundle needs to
-be transferred between teammates. Install Python 3, ExifTool, and Docker Compose.
-On Ubuntu/Debian, the ExifTool package is `libimage-exiftool-perl`.
-
-From the repository root:
-
-```sh
-python3 tools/setup_challenges.py
-```
-
-This creates fresh random flags on first setup, prepares Stage 1's playable
-website, and creates Stage 4's `.env`. Re-running preserves existing flags.
-The setup tool contains no real flags, passwords, or signing keys.
-
-Run Stage 1 in one terminal:
-
-```sh
-python3 -m http.server 8000 --bind 127.0.0.1 --directory .private/stage1/site
-```
-
-Open http://localhost:8000. `stages/stage1-osint/` is the committed answer-free
-template; serve the generated site for the playable metadata challenge.
-
-Run Stage 4:
-
-```sh
-docker compose -f stages/stage4-web/docker-compose.yml up --build -d
-```
-
-Open http://localhost:8084. The intentionally vulnerable portal uses synthetic
-lab accounts and its flag comes from the ignored `.env` file.
-
-### Dashboard integration
-
-Run setup **on the machine that prepares the deployed challenges**. Import
-`.private/verification.json` into the dashboard's server-only verification store.
-It contains stage IDs and SHA-256 hashes, not plaintext flags. Hash the exact
-submitted UTF-8 flag string and compare with the stored hash. Never send this
-manifest to the browser or publish it as a download.
-
-Publish `.private/stage1/site/` as the Stage 1 player assets, and configure the
-Stage 4 connection URL for the deployed container. The dashboard server must
-use the hashes from that same deployment: each independent setup generates
-different flags. An all-in-one deployment can run the setup command during its
-build/provisioning step, so no manual private-file handoff is needed.
-
-Keep `.private/` and Stage 4 `.env` outside Git and preserve them in private
-hosting storage/backups. Do not regenerate them on every dashboard build;
-replacing deployment flags requires updating its verification records too.
-Existing private authoring scripts and organizer notes are optional local tools,
-not requirements for a fresh clone. The public `tools/setup_challenges.py` is the
-portable setup entry point.
-
 ## Concept
 
 Players join a fictional underground hacker collective investigating and infiltrating **NexaCorp**, a corrupt fictional corporation. Each challenge introduces a different security skill, progressing from reconnaissance to an internal-network capstone.
@@ -75,6 +20,7 @@ The planned dashboard uses a **black, green, and red** visual theme, with challe
 | Document | Purpose |
 |---|---|
 | [README.md](README.md) | Project overview, stage list, architecture, current status and contributor entry point |
+| [SETUP.md](SETUP.md) | Contributor setup, local run commands, testing and dashboard integration |
 | [update.md](update.md) | Detailed implementation plan, migration decisions, folder changes, responsibilities and checklist |
 
 The eight-stage plan below supersedes the original six-stage overview. The eight stage folders are aligned. Implementation and integration are still incomplete; documentation alone does not implement the platform.
@@ -144,10 +90,9 @@ Current repository areas:
 | `stages/` | Eight aligned stage folders; Stage 1 template, Stage 2 assets, Stage 3 oracle, and Stage 4 portal |
 | `docker/` | Placeholder; challenge orchestration not yet implemented |
 | `docs/` | Existing architecture image `pt.png`; diagram update/review pending |
-| `.private/` | Auto-generated flags, Stage 1 player distribution, and server-only verification manifest; ignored |
-| `tools/` | Public setup tool; generates per-deployment answers without committed secrets |
-| `scripts/` | Local-only authoring and validation tools; excluded from Git |
+| `tools/` | Contributor setup utilities |
 | `README.md` | Project overview |
+| `SETUP.md` | Contributor setup and integration guide |
 | `update.md` | Detailed implementation plan |
 
 Target stage folders:
@@ -185,7 +130,7 @@ The dashboard currently has two authentication API routes and a challenge-card c
 - [ ] Test remote lab access, isolation and challenge resets.
 - [ ] Deploy and run the complete player journey.
 
-Asset presence does not confirm a working challenge. Stage 2 has a generation script, but end-to-end challenge validation is pending. Organizer-only Stage 1 build/check scripts are kept locally and excluded from commits. Stage 4 tests are available with `cd stages/stage4-web` followed by `python3 -m unittest -v test_app.py`.
+Asset presence does not confirm a working challenge. Stage 2 has a generation script, but end-to-end challenge validation is pending. Contributor setup and verification instructions are in [SETUP.md](SETUP.md).
 
 ## Working on the project
 
@@ -197,7 +142,7 @@ cd shadownet-ctf
 git fetch origin
 ```
 
-Select the branch assigned to your work. Stage 1 and Stage 4 startup instructions are above; the dashboard is not yet runnable as a complete application.
+Select the branch assigned to your work, then follow [SETUP.md](SETUP.md). The dashboard is not yet runnable as a complete application.
 
 | Responsibility | Contributor / branch |
 |---|---|

@@ -1,0 +1,39 @@
+services:
+  stage5-scripting:
+    build: .
+    ports:
+      - "127.0.0.1:5005:5005"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      HOST: 0.0.0.0
+      PORT: "5005"
+      FLAG_FILE: /data/challenge.flag
+      SERVICE_KEY_FILE: /data/service.key
+    volumes:
+      - stage5-config:/data
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 1.0
+    restart: unless-stopped
+    networks:
+      - stage5-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5005/health',timeout=2).close()"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  stage5-net:
+    driver: bridge
+
+volumes:
+  stage5-config:

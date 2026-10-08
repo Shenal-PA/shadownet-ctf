@@ -1,0 +1,17 @@
+.page { min-height: 100vh; background: #080e0b; color: #d6e8dc; padding: 48px 20px; font-family: Arial, sans-serif; line-height: 1.65; }
+.content { max-width: 900px; margin: auto; }
+.page h1 { font-size: clamp(2.5rem, 7vw, 4rem); line-height: 1.1; color: #f0fff3; margin: 18px 0; }
+.page h2 { color: #a3efb8; }
+.eyebrow { color: #56d985; letter-spacing: .13em; font-size: .8rem; margin-top: 35px; }
+.panel { background: #101d15; border: 1px solid #284934; border-radius: 16px; padding: 24px; margin-top: 24px; }
+.page button, .download { background: #75e69a; color: #071b0d; border: 0; border-radius: 8px; padding: 12px 18px; font: inherit; font-weight: bold; cursor: pointer; display: inline-block; text-decoration: none; margin: 8px 12px 8px 0; }
+.page button:disabled { opacity: .55; cursor: wait; }
+.back { color: #8de8aa; }
+.tokens { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 10px; }
+.tokens code { padding: 10px; background: #08130c; border-radius: 6px; color: #b1ffca; }
+.tokens span { color: #738c7b; margin-right: 10px; }
+.page pre { overflow-x: auto; padding: 14px; background: #08130c; }
+.page label { display: block; }
+.page input { padding: 12px; font: inherit; max-width: 160px; color: #e8fff0; background: #08130c; border: 1px solid #69bf83; border-radius: 8px; margin-right: 12px; }
+.error { color: #ffb3a9; padding: 16px; border: 1px solid #82463d; border-radius: 8px; }
+.flag { color: #9affbc; overflow-wrap: anywhere; }

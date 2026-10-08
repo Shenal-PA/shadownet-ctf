@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local challenge design and organizer documentation
+/docs/stage*/
+
+# Python generated files
+__pycache__/
+*.pyc
+!/stages/stage4-web/.env.example
+
+# Private answers and generated player distributions
+/.private/
+
+# Local-only authoring and validation tools (organizer preference)
+/scripts/

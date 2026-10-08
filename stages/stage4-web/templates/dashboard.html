@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Workspace{% endblock %}
+{% block content %}
+<section class="dashboard">
+  <div class="dashboard-heading"><div><p class="eyebrow">WORKSPACE / {{ user.role | upper }}</p><h1>Welcome, {{ user.display_name }}.</h1><p class="lead">Your NexaCorp staff workspace.</p></div><form method="post" action="{{ url_for('logout') }}"><button class="secondary" type="submit">Sign out ↗</button></form></div>
+  <div class="dashboard-grid">
+    <article class="record-panel"><p class="eyebrow">IDENTITY / CURRENT SESSION</p><h2>Account overview</h2><dl><dt>Username</dt><dd>{{ user.username }}</dd><dt>Access level</dt><dd>{{ user.role }}</dd><dt>Workspace</dt><dd>Staff services</dd></dl></article>
+    {% if flag %}
+    <article class="record-panel protected-record"><p class="eyebrow">RESTRICTED / ADMINISTRATOR ACCESS</p><h2>Internal access record</h2><p>This verification record is available to portal administrators.</p><code class="flag">{{ flag }}</code><p class="record-note">Record NC-ACCESS-04 · Infrastructure Operations</p></article>
+    {% else %}
+    <article class="record-panel"><p class="eyebrow">INFRASTRUCTURE / RESTRICTED RECORDS</p><h2>Administrator access required.</h2><p>Your staff account can access this workspace. Internal access records require an administrator account.</p><span class="access-badge">STAFF ACCESS</span></article>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

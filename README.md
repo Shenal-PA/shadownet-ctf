@@ -2,9 +2,7 @@
 
 An eight-stage Capture The Flag project for **IE3132 — Penetration Testing, SLIIT**.
 
-**Status: early implementation.** Stage 1 is a complete standalone static OSINT challenge with a company website, twelve staff profiles, and a metadata puzzle. Stage 2 assets and a Stage 3 oracle are present; the dashboard is partial and the full platform is not yet runnable or deployed.
-
-**Stage 1:** [setup and player briefing](docs/stage1/README.md). Run `python3 -m http.server 8000 --bind 127.0.0.1 --directory stages/stage1-osint` and open `http://localhost:8000`.
+**Status: early implementation.** Stage 1 is a complete standalone static OSINT challenge with a company website, twelve staff profiles, and a metadata puzzle. Stage 4 is implemented and tested locally. Stage 2 assets and a Stage 3 oracle are present; the dashboard is partial and the full platform is not yet runnable or deployed.
 
 ## Concept
 
@@ -22,9 +20,10 @@ The planned dashboard uses a **black, green, and red** visual theme, with challe
 | Document | Purpose |
 |---|---|
 | [README.md](README.md) | Project overview, stage list, architecture, current status and contributor entry point |
+| [SETUP.md](SETUP.md) | Contributor setup, local run commands, testing and dashboard integration |
 | [update.md](update.md) | Detailed implementation plan, migration decisions, folder changes, responsibilities and checklist |
 
-The eight-stage plan below supersedes the original six-stage overview. Folder alignment and implementation are still pending; documentation changes alone do not implement the platform.
+The eight-stage plan below supersedes the original six-stage overview. The eight stage folders are aligned. Implementation and integration are still incomplete; documentation alone does not implement the platform.
 
 ## Challenge stages
 
@@ -88,11 +87,12 @@ Current repository areas:
 
 | Path | Current contents |
 |---|---|
-| `stages/` | Original six-stage folder layout, mostly placeholders; Stage 2 has initial assets |
+| `stages/` | Eight aligned stage folders; Stage 1 template, Stage 2 assets, Stage 3 oracle, and Stage 4 portal |
 | `docker/` | Placeholder; challenge orchestration not yet implemented |
 | `docs/` | Existing architecture image `pt.png`; diagram update/review pending |
-| `shadownet-starter.zip` | Original starter archive |
+| `tools/` | Contributor setup utilities |
 | `README.md` | Project overview |
+| `SETUP.md` | Contributor setup and integration guide |
 | `update.md` | Detailed implementation plan |
 
 Target stage folders:
@@ -109,9 +109,9 @@ stages/
   stage8-network/
 ```
 
-The existing `stage5-linux/` and `stage6-network/` folders are to become `stage7-linux/` and `stage8-network/`. Coordinate those renames with the team.
+All eight stage folders listed above already exist. Stages 5–8 currently contain placeholders.
 
-Planned dashboard paths are `src/app/`, `src/components/`, `src/lib/`, and `public/assets/`, with a root `package.json`. These application files are not present yet.
+The dashboard currently has two authentication API routes and a challenge-card component. The flag form is empty. Pages, root layout, shared styles, database migrations, verification, scoring, and leaderboard remain to be built. Several auth imports are missing from the dependency manifest.
 
 ## Current progress
 
@@ -119,17 +119,18 @@ Planned dashboard paths are `src/app/`, `src/components/`, `src/lib/`, and `publ
 - [x] Initial repository folders created.
 - [x] Initial Stage 2 image/audio assets added.
 - [x] Next.js migration and implementation plan documented.
-- [ ] Align folders with the eight-stage plan.
+- [x] Align folders with the eight-stage plan.
 - [ ] Implement the Next.js dashboard and database.
 - [x] Complete and validate the standalone Stage 1 website and metadata clue path.
 - [ ] Complete and validate Stage 2 puzzle.
-- [ ] Implement Stage 3–5 containers.
+- [x] Implement and locally test the Stage 4 container.
+- [ ] Validate Stage 3 against the report and implement Stage 5.
 - [ ] Provision and validate Stage 6–8 VMs.
 - [ ] Test scoring, hints, permissions and duplicate submissions.
 - [ ] Test remote lab access, isolation and challenge resets.
 - [ ] Deploy and run the complete player journey.
 
-Asset presence does not confirm a working challenge. Stage 2 has a generation script, but end-to-end challenge validation is pending. Stage 1 validation is available through `python3 scripts/validate_stage1.py`.
+Asset presence does not confirm a working challenge. Stage 2 has a generation script, but end-to-end challenge validation is pending. Contributor setup and verification instructions are in [SETUP.md](SETUP.md).
 
 ## Working on the project
 
@@ -141,7 +142,7 @@ cd shadownet-ctf
 git fetch origin
 ```
 
-Select the branch assigned to your work. There is no application startup command yet because dashboard scaffolding and challenge services have not been implemented.
+Select the branch assigned to your work, then follow [SETUP.md](SETUP.md). The dashboard is not yet runnable as a complete application.
 
 | Responsibility | Contributor / branch |
 |---|---|
@@ -150,7 +151,7 @@ Select the branch assigned to your work. There is no application startup command
 | Stages 2, 3, 6 and 8 | Confirm ownership with the team |
 | Shared deployment and integration | Coordinate between contributors |
 
-Shenal's build order is **Stage 1 → Stage 5 → Stage 4 → Stage 7**.
+Stages 1 and 4 have been implemented locally. Shenal’s next unimplemented stage is Stage 5, followed by the Stage 7 VM. Coordinate dashboard integration and other stage ownership with the team.
 
 Use focused commits and review the destination branch before opening a pull request. The planned integration flow is `dev-shenal` → `dev`, followed by reviewed integration into `main`. Documentation-only changes may be reviewed separately.
 
@@ -166,3 +167,17 @@ Keep real credentials, server-only keys and solution material out of player-faci
 **Programme:** BSc (Hons) IT, SLIIT
 
 The design/planning milestone and the working implementation are separate deliverables. This README reports implementation progress without implying that the complete CTF has already been delivered.
+
+## Remaining implementation sequence
+
+1. Confirm Stage 1/4 private configuration, local testing, and commits.
+2. Build and test Stage 5’s LCG prediction service in its own local Docker network.
+3. Review Stage 2/3 against the report, including solve paths and source flag handling.
+4. Complete the dashboard and database with server-side flag hashes and atomic scoring.
+5. Provision and validate the Stage 6/7 VMs and the Stage 8 two-host isolated lab.
+6. Integrate connection instructions, resets, player testing, and assignment evidence.
+
+Keep real flags, passwords, signing keys, and organizer solutions outside Git.
+Sample credentials used only as synthetic lab/test fixtures are not real account secrets.
+Previously committed answers remain in Git history and are retired; ignoring a file
+does not erase that history. Never publish the repository root as the player website.

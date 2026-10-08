@@ -1,11 +1,6 @@
-import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 
 type Environment = Record<string, string | undefined>;
-type Session = { version: 1; user: string; expected: string; expires: number };
-const A = BigInt(1103515245), C = BigInt(12345), M = BigInt(2147483648);
-const AAD = Buffer.from('shadownet:stage5:v1');
-const TTL = 15 * 60;
-
 class RequestError extends Error {
   status: number;
   constructor(status: number, message: string) { super(message); this.status = status; }
@@ -61,41 +56,57 @@ function authenticatedUser(request: Request, secret: string, now: number): strin
   } catch { throw new RequestError(401, 'Your login has expired. Log in again.'); }
 }
 
-function seal(session: Session, key: Buffer): string {
-  const iv = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', key, iv);
-  cipher.setAAD(AAD);
-  const encrypted = Buffer.concat([cipher.update(JSON.stringify(session)), cipher.final()]);
-  return [iv, cipher.getAuthTag(), encrypted].map(value => value.toString('base64url')).join('.');
-}
-
-function open(token: unknown, key: Buffer, now: number): Session {
-  if (typeof token !== 'string' || token.length > 2048) throw new RequestError(400, 'Invalid challenge session.');
-  try {
-    const pieces = token.split('.');
-    if (pieces.length !== 3 || pieces.some(p => !/^[A-Za-z0-9_-]+$/.test(p))) throw new Error();
-    const [iv, tag, ciphertext] = pieces.map(p => Buffer.from(p, 'base64url'));
-    if (iv.length !== 12 || tag.length !== 16) throw new Error();
-    const decipher = createDecipheriv('aes-256-gcm', key, iv);
-    decipher.setAAD(AAD); decipher.setAuthTag(tag);
-    const session = JSON.parse(Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString());
-    if (session.version !== 1 || typeof session.user !== 'string' || !session.user ||
-        !/^\d{8}$/.test(session.expected) || !Number.isInteger(session.expires)) throw new Error();
-    if (session.expires <= now) throw new RequestError(410, 'Challenge expired. Start a new session.');
-    return session;
-  } catch (error) {
-    if (error instanceof RequestError) throw error;
-    throw new RequestError(400, 'Invalid challenge session. Start again.');
-  }
-}
-
-export function createStage5Handlers(env: Environment, clock = () => Date.now()) {
+export function createStage5Handlers(env: Environment, clock = () => Date.now(), transport: typeof fetch = fetch) {
   function config() {
-    if (!env.JWT_SECRET || !env.STAGE5_SESSION_SECRET || env.STAGE5_SESSION_SECRET.length < 32 ||
-        !env.STAGE5_FLAG || !/^SHADOWNET\{[a-z0-9_]+\}$/.test(env.STAGE5_FLAG)) {
+    if (!env.JWT_SECRET || !env.STAGE5_SERVICE_URL || !env.STAGE5_SERVICE_KEY || env.STAGE5_SERVICE_KEY.length < 32) {
       throw new RequestError(503, 'Stage 5 is not configured. Contact the organizer.');
     }
-    return { jwt: env.JWT_SECRET, key: createHash('sha256').update(env.STAGE5_SESSION_SECRET).digest(), flag: env.STAGE5_FLAG };
+    let url: URL;
+    try { url = new URL(env.STAGE5_SERVICE_URL); }
+    catch { throw new RequestError(503, 'Stage 5 service URL is invalid.'); }
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) {
+      throw new RequestError(503, 'Stage 5 service URL is invalid.');
+    }
+    return { jwt: env.JWT_SECRET, base: url.toString().replace(/\/$/, ''), key: env.STAGE5_SERVICE_KEY };
+  }
+  async function forward(path: string, input: object) {
+    const settings = config();
+    let response: Response;
+    try {
+      response = await transport(settings.base + path, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + settings.key },
+        body: JSON.stringify(input), cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(10000),
+      });
+    } catch { throw new RequestError(503, 'Stage 5 lab is unavailable. Try again later.'); }
+    let data;
+    try { data = await response.json(); }
+    catch { throw new RequestError(502, 'Stage 5 lab returned an invalid response.'); }
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new RequestError(502, 'Stage 5 lab returned an invalid response.');
+    }
+    if (!response.ok) {
+      const errors: Record<number, string> = {
+        400: 'Invalid challenge input.', 410: 'Challenge expired or restarted. Start a new session.',
+        422: 'Incorrect prediction. Review your script and try again.',
+        429: 'Attempt limit reached. Start a new session.', 503: 'Stage 5 lab is busy. Try again later.',
+      };
+      throw new RequestError(errors[response.status] ? response.status : 502,
+        errors[response.status] || 'Stage 5 lab connection failed. Contact the organizer.');
+    }
+    // Only forward the documented player fields, never arbitrary service output.
+    if (path === '/start') {
+      if (typeof data.session !== 'string' || !data.session || data.session.length > 128 ||
+          !Array.isArray(data.tokens) || data.tokens.length !== 15 ||
+          !data.tokens.every((token: unknown) => typeof token === 'string' && /^\d{8}$/.test(token)) ||
+          typeof data.expiresAt !== 'string' || !Number.isFinite(Date.parse(data.expiresAt))) {
+        throw new RequestError(502, 'Stage 5 lab returned an invalid response.');
+      }
+      return json({ session: data.session, tokens: data.tokens, expiresAt: data.expiresAt });
+    }
+    if (typeof data.flag !== 'string' || !/^SHADOWNET\{[a-z0-9_]+\}$/.test(data.flag)) {
+      throw new RequestError(502, 'Stage 5 lab returned an invalid response.');
+    }
+    return json({ message: 'Prediction accepted. Submit this flag to the main dashboard.', flag: data.flag });
   }
   async function respond(operation: () => Promise<Response>) {
     try { return await operation(); }
@@ -108,32 +119,18 @@ export function createStage5Handlers(env: Environment, clock = () => Date.now())
     start: (request: Request) => respond(async () => {
       checkRequest(request);
       const settings = config();
-      const now = Math.floor(clock() / 1000);
-      const user = authenticatedUser(request, settings.jwt, now);
+      const user = authenticatedUser(request, settings.jwt, Math.floor(clock() / 1000));
       await body(request);
-      // Preserve timestamp seeding and the report's exact LCG arithmetic.
-      let state = BigInt(clock()) % M;
-      const tokens: string[] = [];
-      for (let i = 0; i < 15; i++) {
-        state = (A * state + C) % M;
-        tokens.push((state % BigInt(100000000)).toString().padStart(8, '0'));
-      }
-      state = (A * state + C) % M;
-      const expected = (state % BigInt(100000000)).toString().padStart(8, '0');
-      const session = seal({ version: 1, user, expected, expires: now + TTL }, settings.key);
-      return json({ session, tokens, expiresAt: new Date((now + TTL) * 1000).toISOString() });
+      return forward('/start', { user });
     }),
     predict: (request: Request) => respond(async () => {
       checkRequest(request);
-      const settings = config();
       const input = await body(request);
-      if (typeof input.prediction !== 'string' || !/^\d{8}$/.test(input.prediction)) {
-        throw new RequestError(400, 'Prediction must be an eight-digit string, including leading zeroes.');
+      if (typeof input.prediction !== 'string' || !/^\d{8}$/.test(input.prediction) ||
+          typeof input.session !== 'string' || !input.session || input.session.length > 128) {
+        throw new RequestError(400, 'Send a challenge session and an eight-digit prediction.');
       }
-      const session = open(input.session, settings.key, Math.floor(clock() / 1000));
-      if (input.prediction !== session.expected) return json({ error: 'Incorrect prediction. Review your script and try again.' }, 422);
-      // A copied session is a temporary bearer credential; never log its value.
-      return json({ message: 'Prediction accepted. Submit this flag to the main dashboard.', flag: settings.flag });
+      return forward('/predict', { session: input.session, prediction: input.prediction });
     }),
   };
 }

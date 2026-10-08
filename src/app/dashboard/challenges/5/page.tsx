@@ -56,9 +56,8 @@ export default function Stage5Page() {
           <li>Implement <code>predict_next(tokens)</code> in the starter using the observed samples.</li>
           <li>Run your script to recover the flag, then submit it in the main dashboard.</li>
         </ol>
-        <p>Tokens have eight digits, including leading zeroes. Your challenge file is private and expires after 15 minutes. Start again if it expires.</p>
+        <p>Tokens have eight digits, including leading zeroes. Your challenge file is private and expires after 15 minutes. You have three prediction attempts. Start a new session if it expires or the lab restarts.</p>
         <button onClick={start} disabled={busy}>{busy ? 'Please wait…' : challenge ? 'Start new session' : 'Start challenge'}</button>
-        <a className={styles.download} href="/downloads/stage5-starter.py" download>Download Python starter</a>
       </section>
       {error && <p role="alert" className={styles.error}>{error}</p>}
       {challenge && <section className={styles.panel}>
@@ -66,6 +65,7 @@ export default function Stage5Page() {
         <div className={styles.tokens}>{challenge.tokens.map((token, index) => <code key={index}><span>{String(index + 1).padStart(2, '0')}</span> {token}</code>)}</div>
         <p>Expires: <time dateTime={challenge.expiresAt}>{challenge.expiresAt}</time></p>
         <button onClick={download}>Download challenge data</button>
+        <a className={styles.download} href="/downloads/stage5-starter.py" download>Download Python starter</a>
         <pre>python3 stage5-starter.py --challenge stage5-challenge.json</pre>
         <p>Python 3 and an internet connection are sufficient. You can also test a prediction below.</p>
         <form onSubmit={predict}>

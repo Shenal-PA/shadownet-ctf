@@ -1,0 +1,25 @@
+services:
+  stage4-web:
+    build: .
+    ports:
+      - "127.0.0.1:8084:8080"
+    env_file:
+      - .env
+    environment:
+      DATABASE_PATH: /tmp/nexacorp-stage4/portal.sqlite3
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 256m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2)"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 10s

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="login-layout">
+  <div class="intro">
+    <p class="eyebrow"><span class="dot"></span> THE WORK BEHIND THE WORK</p>
+    <h1>Your people.<br>Your workspace.<br><em>One front door.</em></h1>
+    <p class="lead">Access the tools and operational records that keep NexaCorp moving.</p>
+    <div class="system-visual" aria-hidden="true"><span class="system-node">NC</span><div class="system-lines"><span>PEOPLE & OPERATIONS</span><span>INTERNAL SERVICES</span><span>INFRASTRUCTURE RECORDS</span></div></div>
+    <p class="note">Staff services · Identity gateway · Portal v1.4</p>
+  </div>
+  <div class="login-panel">
+    <p class="eyebrow">STAFF ACCESS / 01</p>
+    <h2>Welcome back.</h2>
+    <p class="subtext">Sign in with your NexaCorp staff account.</p>
+    {% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
+    <form method="post" action="{{ url_for('login') }}">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" placeholder="Your staff username" autocomplete="username" maxlength="256" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" placeholder="Your account password" autocomplete="current-password" maxlength="256" required>
+      <button type="submit">Sign in <span aria-hidden="true">↗</span></button>
+    </form>
+    <div class="panel-footer"><span class="dot"></span> Staff accounts are managed by IT Infrastructure.</div>
+    <p class="support-note">Access issues? Contact your internal service desk.</p>
+  </div>
+</section>
+{% endblock %}

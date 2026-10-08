@@ -4,9 +4,13 @@ services:
     ports:
       - "127.0.0.1:8084:8080"
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       DATABASE_PATH: /tmp/nexacorp-stage4/portal.sqlite3
+      FLAG_FILE: /data/challenge.flag
+    volumes:
+      - stage4-config:/data
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=32m,mode=1777
@@ -23,3 +27,6 @@ services:
       timeout: 3s
       retries: 3
       start_period: 10s
+
+volumes:
+  stage4-config:

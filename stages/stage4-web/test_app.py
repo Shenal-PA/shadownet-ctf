@@ -2,6 +2,7 @@ import sqlite3
 from contextlib import closing
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from app import create_app
@@ -68,6 +69,16 @@ class PortalTests(unittest.TestCase):
         self.assertEqual(self.login('').status_code, 400)
         self.assertEqual(self.login('x' * 257).status_code, 400)
         self.assertEqual(self.client.post('/login', data=b'x' * 9000).status_code, 413)
+
+    def test_no_env_flag_generates_persistent_runtime_flag(self):
+        flag_file = Path(self.temp.name) / 'runtime.flag'
+        config = {'TESTING': True, 'DATABASE': self.db, 'FLAG': None}
+        with patch.dict('os.environ', {'FLAG_FILE': str(flag_file)}):
+            first = create_app(config)
+            second = create_app(config)
+        self.assertTrue(first.config['FLAG'].startswith('SHADOWNET{portal_'))
+        self.assertEqual(first.config['FLAG'], second.config['FLAG'])
+        self.assertEqual(flag_file.read_text(), first.config['FLAG'])
 
     def test_restart_preserves_existing_data(self):
         create_app({'TESTING': True, 'DATABASE': self.db,

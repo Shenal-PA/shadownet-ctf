@@ -1,67 +1,58 @@
-# ShadowNet CTF — Setup and Integration
+# ShadowNet CTF — Challenge Integration
 
-All code and answer-free assets are included in Git. No private bundle needs to
-be transferred between teammates. Install Python 3, ExifTool, and Docker Compose.
-On Ubuntu/Debian, the ExifTool package is `libimage-exiftool-perl`.
+Stages 1 and 4 run directly after cloning. No separate preparation or flag-import
+script is required. Register each deployed challenge’s actual flag through the
+main dashboard’s administrator interface. The dashboard teammate adds the
+challenge descriptions, links and verification handling.
 
-From the repository root:
+## Stage 1
 
-```sh
-python3 tools/setup_challenges.py
-```
-
-This creates fresh random flags on first setup, prepares Stage 1's playable
-website, and creates Stage 4's `.env`. Re-running preserves existing flags.
-The setup tool contains no real flags, passwords, or signing keys.
-
-Run Stage 1 in one terminal:
+Serve `stages/stage1-osint/` directly:
 
 ```sh
-python3 -m http.server 8000 --bind 127.0.0.1 --directory .private/stage1/site
+python3 -m http.server 8000 --bind 127.0.0.1 --directory stages/stage1-osint
 ```
 
-Open http://localhost:8000. `stages/stage1-osint/` is the committed answer-free
-template; serve the generated site for the playable metadata challenge.
+Open http://localhost:8000. The complete playable pages and metadata-bearing
+image are included. When integrating, preserve original image bytes; image
+optimisation or metadata stripping can erase the puzzle. Publish only the stage
+folder, not the repository root. Its image can also be downloaded and solved
+from a public repository; there is no promise of secret static assets in Git.
 
-Run Stage 4:
+## Stage 4
 
 ```sh
 docker compose -f stages/stage4-web/docker-compose.yml up --build -d
 ```
 
-Open http://localhost:8084. The intentionally vulnerable portal uses synthetic
-lab accounts and its flag comes from the ignored `.env` file.
+Open http://localhost:8084. The portal starts without a mandatory `.env` file.
+If no `FLAG` is supplied, it creates a flag internally and preserves it in the
+`stage4-config` Docker volume. Existing local `.env` flags are still supported.
+The temporary application database resets when the container is recreated,
+while the generated flag survives in the configuration volume.
 
-## Dashboard integration
+For a chosen fixed flag, optionally create an ignored `stages/stage4-web/.env`
+containing `FLAG=<your chosen flag>`, then recreate the container. Register that
+same value in the main dashboard. Changing a dashboard answer alone does not
+change what the challenge displays.
 
-Run setup **on the machine that prepares the deployed challenges**. Import
-`.private/verification.json` into the dashboard's server-only verification store.
-It contains stage IDs and SHA-256 hashes, not plaintext flags. Hash the exact
-submitted UTF-8 flag string and compare with the stored hash. Never send this
-manifest to the browser or publish it as a download.
+Keep the configuration volume during ordinary resets. Removing it rotates an
+automatically generated flag, so the dashboard answer must then be updated.
 
-Publish `.private/stage1/site/` as the Stage 1 player assets, and configure the
-Stage 4 connection URL for the deployed container. The dashboard server must
-use the hashes from that same deployment: each independent setup generates
-different flags. An all-in-one deployment can run the setup command during its
-build/provisioning step, so no manual private-file handoff is needed.
+## Dashboard teammate
 
-Keep `.private/` and Stage 4 `.env` outside Git and preserve them in private
-hosting storage/backups. Do not regenerate them on every dashboard build;
-replacing deployment flags requires updating its verification records too.
-Existing private authoring scripts and organizer notes are optional local tools,
-not requirements for a fresh clone. The public `tools/setup_challenges.py` is the
-portable setup entry point.
+1. Merge the stage files.
+2. Serve the Stage 1 folder and start the Stage 4 container on the lab host.
+3. Add each challenge and its connection URL to the dashboard.
+4. The organiser registers the exact deployed flags in the dashboard admin panel.
 
-## Local verification
+Flag submission and scoring remain the main dashboard's responsibility. Nothing
+in these challenges automatically edits the dashboard database. Real platform
+credentials, signing keys and deployment `.env` files remain outside Git.
 
-Run the Stage 4 tests:
+## Tests
 
 ```sh
 cd stages/stage4-web
 python3 -m unittest -v test_app.py
 ```
-
-Existing Stage 1 authoring/check scripts are local organizer tools and are not
-required by the public setup workflow. Preserve any private configuration before
-changing flags or redeploying a running challenge.

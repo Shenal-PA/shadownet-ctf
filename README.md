@@ -90,7 +90,6 @@ Current repository areas:
 | `stages/` | Eight aligned stage folders; Stage 1 template, Stage 2 assets, Stage 3 oracle, and Stage 4 portal |
 | `docker/` | Placeholder; challenge orchestration not yet implemented |
 | `docs/` | Existing architecture image `pt.png`; diagram update/review pending |
-| `tools/` | Contributor setup utilities |
 | `README.md` | Project overview |
 | `SETUP.md` | Contributor setup and integration guide |
 | `update.md` | Detailed implementation plan |

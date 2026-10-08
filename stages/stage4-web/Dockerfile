@@ -3,6 +3,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && useradd --uid 10001 --no-create-home portal
+RUN mkdir /data && chown portal:portal /data && chmod 700 /data
 COPY app.py wsgi.py ./
 COPY templates ./templates
 COPY static ./static

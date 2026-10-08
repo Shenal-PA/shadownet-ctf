@@ -57,7 +57,15 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
     if not app.config.get('FLAG'):
-        raise RuntimeError('Set FLAG in the environment before starting the challenge.')
+        flag_path = Path(os.environ.get('FLAG_FILE', '/tmp/nexacorp-stage4/challenge.flag'))
+        flag_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with flag_path.open('x') as file:
+                file.write('SHADOWNET{portal_' + secrets.token_hex(16) + '}')
+            flag_path.chmod(0o600)
+        except FileExistsError:
+            pass
+        app.config['FLAG'] = flag_path.read_text().strip()
     initialize_database(app)
 
     @app.after_request

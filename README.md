@@ -2,7 +2,9 @@
 
 An eight-stage Capture The Flag project for **IE3132 — Penetration Testing, SLIIT**.
 
-**Status: early implementation.** The Next.js dashboard is planned but has not yet been built. The repository currently contains the initial challenge folders, some Stage 2 assets, and planning material. The full platform is not yet runnable or deployed.
+**Status: early implementation.** Stage 1 is a complete standalone static OSINT challenge with a company website, twelve staff profiles, and a metadata puzzle. Stage 2 assets and a Stage 3 oracle are present; the dashboard is partial and the full platform is not yet runnable or deployed.
+
+**Stage 1:** [setup and player briefing](docs/stage1/README.md). Run `python3 -m http.server 8000 --bind 127.0.0.1 --directory stages/stage1-osint` and open `http://localhost:8000`.
 
 ## Concept
 
@@ -119,14 +121,15 @@ Planned dashboard paths are `src/app/`, `src/components/`, `src/lib/`, and `publ
 - [x] Next.js migration and implementation plan documented.
 - [ ] Align folders with the eight-stage plan.
 - [ ] Implement the Next.js dashboard and database.
-- [ ] Complete and validate Stage 1–2 puzzles.
+- [x] Complete and validate the standalone Stage 1 website and metadata clue path.
+- [ ] Complete and validate Stage 2 puzzle.
 - [ ] Implement Stage 3–5 containers.
 - [ ] Provision and validate Stage 6–8 VMs.
 - [ ] Test scoring, hints, permissions and duplicate submissions.
 - [ ] Test remote lab access, isolation and challenge resets.
 - [ ] Deploy and run the complete player journey.
 
-Asset presence does not confirm a working challenge. The existing Stage 2 spectrogram-generation script is empty, and end-to-end challenge validation is pending.
+Asset presence does not confirm a working challenge. Stage 2 has a generation script, but end-to-end challenge validation is pending. Stage 1 validation is available through `python3 scripts/validate_stage1.py`.
 
 ## Working on the project
 

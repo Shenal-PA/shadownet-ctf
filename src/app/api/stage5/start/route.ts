@@ -1,4 +1,4 @@
-import { handleStage5Start } from '../../../../lib/stage5-http';
+import { handleStage5Start } from '../../../../../stages/stage5-scripting/platform-http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

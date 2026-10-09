@@ -45,7 +45,7 @@ export default function Stage7LabPage() {
   return <main className={styles.page}><div className={styles.content}>
     <a className={styles.back} href="/dashboard/challenges/7">← Return to mission, hints & flag submission</a>
     <header className={styles.header}><div><p className={styles.eyebrow}>SHADOWNET / NEXA-ROOT-07 / LINUX LAB</p><h1>Under the Hood</h1><p>Your assigned NexaCorp operations terminal.</p></div><span className={styles.badge} role="status">{lab ? labels[lab.state] : busy ? 'Checking lab' : 'Not connected'}</span></header>
-    <section className={styles.brief}><h2>Lab objective</h2><p>Begin with the operations handover notes. Investigate a misconfigured privileged maintenance program and recover <code>/root/flag.txt</code>.</p><p>Use the mission page for paid hints and submit your recovered flag there. Start opens your assigned lab; Reset discards its changes.</p></section>
+    <section className={styles.brief}><h2>Lab objective</h2><p>Begin with the operations handover notes. Investigate a misconfigured privileged maintenance program and recover <code>/root/flag.txt</code>.</p><p>Use the mission page for paid hints and submit your recovered flag there. Start opens your assigned lab; Reset discards its changes.</p><p>This assignment lab runs in the organizer’s isolated local environment. Each active player receives a separate machine. If all machines are busy, try again after a session ends.</p></section>
     <section className={styles.workspace} aria-label="Stage 7 browser terminal">
       <div className={styles.toolbar}><span>NX-LINUX-07 / TERMINAL</span><div className={styles.actions}>
         <button onClick={() => void request('start')} disabled={busy || !!active}>Start lab</button>

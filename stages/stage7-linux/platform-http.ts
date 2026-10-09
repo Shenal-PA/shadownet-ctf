@@ -87,7 +87,7 @@ export function createStage7Handler(env: Environment, transport: typeof fetch = 
           const messages: Record<number, string> = {
             403: 'Complete the required previous stage to access this lab.',
             409: 'Your lab is still changing state. Please wait.',
-            429: 'Too many lab requests. Please wait before retrying.',
+            429: 'Local lab capacity or request limit reached. Please wait before retrying.',
             503: 'Your lab is temporarily unavailable. Try again later.',
           };
           throw new LabError(messages[response.status] ? response.status : 502,

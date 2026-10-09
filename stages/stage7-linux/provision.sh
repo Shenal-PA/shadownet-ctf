@@ -54,11 +54,12 @@ done
 compiled_binary=''
 ssh_candidate=''
 ssh_check_config=''
+ssh_baseline=''
 install_started=0
 cleanup() {
     result=$?
     trap - EXIT
-    for temporary in "$compiled_binary" "$ssh_candidate" "$ssh_check_config"; do
+    for temporary in "$compiled_binary" "$ssh_candidate" "$ssh_check_config" "$ssh_baseline"; do
         [[ -z "$temporary" ]] || rm -f -- "$temporary"
     done
     if (( result != 0 && install_started == 1 )); then
@@ -85,25 +86,51 @@ compiled_binary="$(mktemp)"
 gcc -std=c11 -O2 -Wall -Wextra -Werror -fstack-protector-strong -D_FORTIFY_SOURCE=2 -fPIE -pie -Wl,-z,relro,-z,now "$stage_source/maintenance/nexa-audit.c" -o "$compiled_binary"
 ssh_candidate="$(mktemp)"
 cat > "$ssh_candidate" <<'SSH'
+# ShadowNet Stage 7: analyst-only lab access. Added after existing global policy.
 Match User analyst
     PasswordAuthentication yes
     PubkeyAuthentication yes
     KbdInteractiveAuthentication no
     AllowTcpForwarding no
+    DisableForwarding yes
+    PermitUserRC no
     X11Forwarding no
     PermitTunnel no
     Banner /opt/nexacorp/ops/login-banner.txt
 Match all
 SSH
 ssh_check_config="$(mktemp)"
-printf 'Include %s\nInclude /etc/ssh/sshd_config\n' "$ssh_candidate" > "$ssh_check_config"
+# Match blocks belong after the existing global settings, not in an early drop-in.
+[[ -f /etc/ssh/sshd_config && ! -L /etc/ssh/sshd_config ]] || fail 'SSH main configuration must be a regular, non-symlinked file.'
+[[ "$(stat -c %u /etc/ssh/sshd_config)" == 0 ]] || fail 'SSH main configuration must be root-owned.'
+ssh_mode="$(stat -c %a /etc/ssh/sshd_config)"
+(( (8#$ssh_mode & 0022) == 0 )) || fail 'SSH main configuration must not be group/world writable.'
+ssh_baseline="$(mktemp)"
+cat /etc/ssh/sshd_config > "$ssh_baseline"
+cat "$ssh_baseline" > "$ssh_check_config"
+printf '\n' >> "$ssh_check_config"
+cat "$ssh_candidate" >> "$ssh_check_config"
 /usr/sbin/sshd -t -f "$ssh_check_config"
-/usr/sbin/sshd -T -f "$ssh_check_config" -C user=analyst,host=localhost,addr=127.0.0.1 | grep -qx 'passwordauthentication yes' || fail 'Existing SSH policy overrides analyst access. Review it before provisioning.'
+check_analyst_policy() {
+    local config="$1" policy expected
+    policy="$(/usr/sbin/sshd -T -f "$config" -C user=analyst,host=localhost,addr=127.0.0.1)"
+    for expected in 'passwordauthentication yes' 'pubkeyauthentication yes' \
+        'kbdinteractiveauthentication no' 'allowtcpforwarding no' \
+        'disableforwarding yes' 'permituserrc no' 'x11forwarding no' \
+        'permittunnel no' 'banner /opt/nexacorp/ops/login-banner.txt'; do
+        grep -qxF -- "$expected" <<< "$policy" || fail 'Existing SSH policy overrides Stage 7 access restrictions. Review it before provisioning.'
+    done
+}
+check_analyst_policy "$ssh_check_config"
+
+# Detect concurrent configuration edits before making any system changes.
+cmp -s -- "$ssh_baseline" /etc/ssh/sshd_config || fail 'SSH configuration changed during preflight. Review it and retry.'
 
 # Atomic directory creation also prevents two installers from proceeding together.
 mkdir -m 0700 -- "$state_dir"
 install_started=1
 printf 'installing\n' > "$state_dir/status"
+install -m 0600 -o root -g root "$ssh_baseline" "$state_dir/sshd_config.original"
 useradd --create-home --shell /bin/bash analyst
 chmod 0700 /home/analyst
 
@@ -142,10 +169,13 @@ fi
 PROFILE
 chmod 0644 /etc/profile.d/nexacorp-stage7.sh
 
-# Add the reviewed analyst-only drop-in; leave existing SSH files and /etc/motd alone.
-install -m 0644 -o root -g root "$ssh_candidate" /etc/ssh/sshd_config.d/00-shadownet-stage7.conf
+# Append the reviewed Match block, preserving existing settings and a private backup.
+# Refuse to append if an administrator changed the configuration during installation.
+cmp -s -- "$ssh_baseline" /etc/ssh/sshd_config || fail 'SSH configuration changed during installation. Restore the clean snapshot and review the changes.'
+printf '\n' >> /etc/ssh/sshd_config
+cat "$ssh_candidate" >> /etc/ssh/sshd_config
 /usr/sbin/sshd -t
-/usr/sbin/sshd -T -C user=analyst,host=localhost,addr=127.0.0.1 | grep -qx 'passwordauthentication yes' || fail 'Installed SSH policy does not permit analyst password access.'
+check_analyst_policy /etc/ssh/sshd_config
 [[ -d /run/systemd/system ]] || fail 'A running systemd VM is required to activate SSH.'
 systemctl enable ssh
 systemctl restart ssh

@@ -1,0 +1,27 @@
+{
+  "gateway_key": "REPLACE_WITH_A_RANDOM_PRIVATE_KEY",
+  "allowed_users": ["REPLACE_WITH_ACTUAL_DASHBOARD_USER_IDS"],
+  "dashboard_origin": "http://127.0.0.1:3000",
+  "port": 5007,
+  "network_isolation_verified": false,
+  "slots": [
+    {
+      "vm_uuid": "00000000-0000-0000-0000-000000000001",
+      "snapshot_uuid": "10000000-0000-0000-0000-000000000001",
+      "guest_ip": "192.168.56.101",
+      "hostonly_adapter": "vboxnet0",
+      "ssh_key": "/absolute/private/path/stage7_slot1",
+      "known_hosts": "/absolute/private/path/stage7_slot1_known_hosts",
+      "dedicated_stage7_vm": true
+    },
+    {
+      "vm_uuid": "00000000-0000-0000-0000-000000000002",
+      "snapshot_uuid": "10000000-0000-0000-0000-000000000002",
+      "guest_ip": "192.168.57.101",
+      "hostonly_adapter": "vboxnet1",
+      "ssh_key": "/absolute/private/path/stage7_slot2",
+      "known_hosts": "/absolute/private/path/stage7_slot2_known_hosts",
+      "dedicated_stage7_vm": true
+    }
+  ]
+}

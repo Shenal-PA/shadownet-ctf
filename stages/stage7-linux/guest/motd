@@ -1,0 +1,8 @@
+
+   N E X A C O R P  /  INTERNAL OPERATIONS
+   NX-LINUX-07 — ShadowNet authorised training lab
+
+   Stage 7: Under the Hood
+   Begin with /opt/nexacorp/ops/shift-notes.txt.
+   Objective: recover the protected evidence in /root/flag.txt.
+   This account has no administrative sudo access.

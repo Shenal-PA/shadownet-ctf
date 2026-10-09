@@ -1,0 +1,26 @@
+.page { min-height: 100vh; background: #101926; color: #dce4ee; padding: 35px 22px; font-family: Arial, sans-serif; line-height: 1.6; }
+.content { max-width: 1320px; margin: auto; }
+.back { color: #b1e876; font-size: .9rem; }
+.header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; padding: 28px 0; }
+.header h1 { margin: 8px 0; font-size: clamp(2rem, 5vw, 3rem); color: #f5f8fc; line-height: 1.15; }
+.header p { margin: 5px 0; }
+.eyebrow { color: #a6ec16; font: .8rem monospace; letter-spacing: .07em; }
+.badge { border: 1px solid #486320; border-radius: 30px; padding: 7px 15px; background: #1d2a19; color: #a6ec16; font-family: monospace; }
+.brief { background: #151f2e; border: 1px solid #2c3c50; border-top: 3px solid #a6ec16; border-radius: 10px; padding: 18px 24px; margin-bottom: 24px; }
+.brief h2 { margin: 0; font-size: 1.1rem; }
+.brief p { margin: 10px 0; }
+.workspace { border: 1px solid #2c3c50; border-radius: 10px; overflow: hidden; background: #080e15; }
+.toolbar { padding: 14px 18px; background: #192536; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; font: .85rem monospace; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.page button { color: #cfdbec; background: #202e40; border: 1px solid #43546b; border-radius: 6px; padding: 10px 14px; cursor: pointer; font: inherit; }
+.actions button:first-child { color: #132000; background: #a6ec16; border-color: #a6ec16; font-weight: bold; }
+.page button:disabled { opacity: .45; cursor: default; }
+.terminal { display: block; width: 100%; height: min(70vh, 760px); min-height: 430px; border: 0; background: #080e15; }
+.placeholder { min-height: 430px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 25px; }
+.placeholder h2 { font-size: 1.15rem; margin: 10px; }
+.placeholder p { color: #9daec6; max-width: 520px; }
+.prompt { color: #a6ec16; font: 3rem monospace; }
+.error, .confirm { padding: 14px 20px; margin: 0; background: #302322; color: #ffd0ab; border-bottom: 1px solid #795542; }
+.confirm button { margin-right: 10px; }
+.footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 12px 18px; color: #a7b6cb; background: #151f2e; font: .8rem monospace; }
+@media (max-width: 600px) { .page { padding: 24px 12px; } .toolbar { align-items: flex-start; } .actions button { font-size: .8rem; } }

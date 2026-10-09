@@ -1,0 +1,16 @@
+NexaCorp Operations — night shift handover
+Asset: NX-LINUX-07
+
+You are reviewing a machine recovered after an internal access incident.
+Your analyst account has read access to the operations notes and inventory.
+Administrative evidence is held separately from the ordinary employee files.
+
+Ticket NX-741: The legacy audit console was retained during the migration.
+Operators still use /opt/nexacorp/bin/nexa-audit to produce inventory reports.
+The inventory helper was moved into /usr/local/bin during the last release.
+The console itself was not rebuilt as part of that move.
+
+Ticket NX-748: The analyst account should not need sudo for routine review.
+Please report unexpected elevated permissions on legacy executables.
+
+End of handover. Do not assume that an old deployment was configured correctly.

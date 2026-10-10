@@ -15,7 +15,7 @@ def main():
     parser.add_argument('--user', required=True, help='Explicit organizer-approved local demo user ID')
     parser.add_argument('action', choices=('start', 'status', 'reset', 'stop'))
     args = parser.parse_args()
-    path = Path(os.environ['STAGE7_LOCAL_CONFIG'])
+    path = Path(os.environ.get('STAGE7_LOCAL_CONFIG') or Path.home() / '.local/share/shadownet-stage7/config.json')
     mode = path.lstat()
     if not stat.S_ISREG(mode.st_mode) or mode.st_uid != os.getuid() or mode.st_mode & 0o077:
         parser.error('Use an owner-only regular private configuration file.')

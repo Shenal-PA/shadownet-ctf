@@ -14,7 +14,7 @@ def main():
     memory = next(int(line.split()[1]) // 1024 for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith('MemAvailable:'))
     check('Two-slot memory budget', memory >= 4864, 'Suggested minimum available RAM: 4096 MiB for two guests plus 768 MiB reserve.')
     isolation_confirmed = False
-    config = os.environ.get('STAGE7_LOCAL_CONFIG')
+    config = os.environ.get('STAGE7_LOCAL_CONFIG') or str(Path.home() / '.local/share/shadownet-stage7/config.json')
     if config:
         path = Path(config)
         private = path.is_file() and not path.is_symlink() and path.stat().st_uid == os.getuid() and not path.stat().st_mode & 0o077

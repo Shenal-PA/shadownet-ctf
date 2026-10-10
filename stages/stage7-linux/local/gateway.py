@@ -427,7 +427,9 @@ def validate_routing(config):
 
 
 def main():
-    path = Path(os.environ['STAGE7_LOCAL_CONFIG'])
+    path = Path(os.environ.get('STAGE7_LOCAL_CONFIG') or Path.home() / '.local/share/shadownet-stage7/config.json')
+    if not path.exists():
+        raise ValueError('Private config not found. Set STAGE7_LOCAL_CONFIG or create ~/.local/share/shadownet-stage7/config.json.')
     if not path.is_file() or path.is_symlink() or path.stat().st_uid != os.getuid() or path.stat().st_mode & 0o077:
         raise ValueError('Private configuration must be an owner-only regular file.')
     lab = Pool(json.loads(path.read_text()))
@@ -461,4 +463,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    try:
+        main()
+    except (ValueError, OSError, KeyError) as error:
+        print(f'Stage 7 startup failed: {error}', file=sys.stderr)
+        raise SystemExit(1)

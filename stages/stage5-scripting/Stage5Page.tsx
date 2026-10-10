@@ -59,7 +59,7 @@ export default function Stage5Page() {
         <p>Tokens have eight digits, including leading zeroes. Your challenge file is private and expires after 15 minutes. You have three prediction attempts. Start a new session if it expires or the lab restarts.</p>
         <button onClick={start} disabled={busy}>{busy ? 'Please wait…' : challenge ? 'Start new session' : 'Start challenge'}</button>
       </section>
-      {error && <p role="alert" className={styles.error}>{error}</p>}
+      {error && <p role="alert" className={styles.error}>{error} {(/log in|login/i).test(error) && <a href="/login">Open login</a>}</p>}
       {challenge && <section className={styles.panel}>
         <h2>Captured tokens</h2>
         <div className={styles.tokens}>{challenge.tokens.map((token, index) => <code key={index}><span>{String(index + 1).padStart(2, '0')}</span> {token}</code>)}</div>

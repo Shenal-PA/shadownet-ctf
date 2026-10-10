@@ -1,0 +1,16 @@
+services:
+  stage6-re:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stage6-re
+    ports:
+      - "2222:22"
+    restart: unless-stopped
+    networks:
+      - stage6-net
+
+networks:
+  stage6-net:
+    driver: bridge
+

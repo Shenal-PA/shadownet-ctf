@@ -1,2 +1,5 @@
 assets/passphrase.txt
 assets/spectrogram_reference.png
+SOLUTION.md
+setup_stage2.sh
+generate_spectrogram.py
